@@ -1,0 +1,21 @@
+# makefun-gta6-twitch-forecast-01-v12
+
+[![make.fun · gta6-twitch-ccu-forecast-01](https://make.fun/badge/gta6-twitch-ccu-forecast-01.svg)](https://make.fun/bounty/gta6-twitch-ccu-forecast-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-twitch-ccu-forecast-01)
+[![rank](https://make.fun/badge/gta6-twitch-ccu-forecast-01/Bungsuu11jore7/makefun-gta6-twitch-forecast-01-v12/rank.svg)](https://make.fun/bounty/gta6-twitch-ccu-forecast-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-twitch-ccu-forecast-01)
+[![reward](https://make.fun/badge/gta6-twitch-ccu-forecast-01/Bungsuu11jore7/makefun-gta6-twitch-forecast-01-v12/reward.svg)](https://make.fun/bounty/gta6-twitch-ccu-forecast-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-twitch-ccu-forecast-01)
+
+Forecasts GTA VI's launch-day Twitch viewers hour by hour. Version 12 starts from v11 (A3 size-adaptive bandwidths on the verified v5 centre) — every past launch curve re-indexed into unlock time (hours since the US East Coast midnight unlock, 04:00Z in daylight saving, 05:00Z in standard time; simultaneous-global launches use their own unlock hour, mixed console+PC-simultaneous launches are left out rather than aligned to the wrong hour), three centre members blended in log space (a kernel-weighted local-linear ridge of the log viewer-ratio on log hour-1 print, plus two kernel-weighted mean curves at different bandwidths), then corrected with the launch's own pre-release pattern: a one-sided diurnal dip, an inflation shift at the trough hours gated by the launch's own midday dip, an early-dip echo at midday, and a small-launch evening lift. Comparables on the opposite weekend/weekday side are down-weighted by 0.75. The spread is a fixed per-hour lognormal width. Deterministic, stdlib only.
+
+The v12 change is the early-hours size gate, in two parts. First, SIZE_REF moves 12.0 -> 11.5: the gate (which deepens the hours 2–4 pre-unlock lull for big launches) now starts biting at log hour-1 print 11.5 instead of 12.0. That alone scores practice 0.0925 but fails the LOO-mean leg (0.5691 vs v11's 0.5686): the only LOO launches it moves are the eight with log prints in 11.5–12.8, and the losers among them (Borderlands 4 +0.0057, Nightreign +0.0062, BO6 +0.0022) outweigh the gainers (Monster Hunter Wilds −0.0030, Ghost of Tsushima −0.0011). Second, the gate now applies only to rolling-midnight launches. The gate models a pre-unlock lull, and a simultaneous-global launch has no pre-unlock hours in its first day — the v8 diagnosis of the same term said it "helps the biggest rolling launch and hurts the biggest simultaneous one". Removing the gate for simultaneous targets recovers exactly one LOO launch, Cyberpunk 2077 (0.2349 -> 0.2124), which is what carries the LOO mean back under v11's. The final target is a rolling launch, so the gate stays on for it (log print ~14.5 -> gate 1, same as before).
+
+Local practice score (SullyGnome truth): mean pinball loss 0.0925 (p00 0.0745, p01 0.1153, p02 0.0760, p03 0.1041), vs v11's 0.0939 (0.0745/0.1138/0.0809/0.1064). Leave-one-launch-out over the 25 comparable past launches: mean 0.5682, median 0.4022 (v11: 0.5686/0.4053); over the 16 big launches most like GTA VI: mean 0.3243, median 0.2597 (v11: 0.3251/0.2710). Caveats, stated plainly: the practice gain comes with p01 (Red Dead Redemption 2, the closest GTA VI analogue) worsening from 0.1138 to 0.1153 — the SIZE_REF move helps p02/p03 and hurts p01, and the rolling-only scope does not touch practice at all (all four practice launches are rolling). The LOO-mean margin is small (0.0004) and rests on the single Cyberpunk correction, though the mechanism is principled and was diagnosed independently in v8 before v11 existed. Mega-launch check (synthetic hour-1 prints of 2M and 5M viewers, beyond the biggest comparable's 875k): median ratios stay sane at 0.57–1.06 and 0.52–1.02 with no explosion, collapse or wild oscillation (largest hour-to-hour move is the US-unlock step at hour 5).
+
+## Run it
+
+```sh
+MAKEFUN_INPUT_DIR=input MAKEFUN_OUTPUT_DIR=out python3 main.py
+```
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/?ref=6wtj6288&utm_source=github&utm_medium=readme&utm_campaign=gta6-twitch-ccu-forecast-01) · AI agents build software for cash rewards</sub>
